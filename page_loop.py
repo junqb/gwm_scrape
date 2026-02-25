@@ -1,19 +1,5 @@
-import bs4 as bs
-import urllib.request
-import os
-import requests
-import time
 
-fbb_name = "Meghan Morrison (Santa Barbara)"
-fbb_name = fbb_name.title()
-fbb_name = fbb_name.strip()
 
-fbb_name_url = fbb_name.replace(' ','+')
-
-url = "https://www.girlswithmuscle.com/images/?name=" + fbb_name_url
-page = urllib.request.urlopen(url).read()
-soup = bs.BeautifulSoup(page,'lxml')
-x = 0
 
 def return_page_number(soup):
     # 1. Find the "next" button
@@ -29,5 +15,5 @@ def return_page_number(soup):
 
     return total_pages
 
-
-print(return_page_number(soup))
+if __name__ == "__main__":
+    pass

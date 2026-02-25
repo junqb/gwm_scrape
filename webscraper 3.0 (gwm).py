@@ -11,23 +11,26 @@ from page_loop import return_page_number
 
 
 #naming here is sloppy, but is just to set to a stripped titlecase for ease of use/prevents errors
-# fbb_name = input('Enter fbb name: ')
-fbb_name = "Meghan Morrison (Santa Barbara)"
+fbb_name = input('Enter fbb name: ')
 fbb_name = fbb_name.title()
 fbb_name = fbb_name.strip()
 
 fbb_name_url = fbb_name.replace(' ','+')
+folder_path = os.path.join(os.path.expanduser('~') , r'Pictures/Art Inspo/.muscles/Misc IRL', fbb_name)
+image_log_path = os.path.join(folder_path,'.image_log.txt')
 
 
-my_path = '/home/andy/Pictures/' + fbb_name
-new_path = my_path + ' (new)'
 try:
-    os.makedirs(my_path)
-except:
-    print('There is already a folder named ' + fbb_name)
-    input('Do you want to make a new folder? Press enter to continue: ')
-    os.makedirs(new_path)
+    print(f'Creating new folder for {fbb_name}')
+    os.makedirs(folder_path)
+    with open(image_log_path, 'w'):
+            pass
+
+except FileExistsError:
+    print('File folder Exists. Switching to update mode')
         
+with open(image_log_path, 'r') as f:
+    image_log = {line.strip() for line in f if line.strip()}
 
 
 url = "https://www.girlswithmuscle.com/images/?name=" + fbb_name_url
@@ -44,9 +47,6 @@ for i in range(1,number_of_pages+1):
 
 
 
-x = 0
-
-print('Acquiring urls...')
 
 image_sources = [] #had to create an empty list for future conversion in order to remove ad/site images
 for i in soups:
@@ -56,34 +56,40 @@ for i in soups:
         image_source_full = image_source_raw.replace('thumbs','full')
         image_sources.append(image_source_full)
         image_sources_cleaned = [k for k in image_sources if r'https://www.girlswithmuscle.com/images/' in k]
-print('Done acquiring urls.')
-print(image_sources_cleaned)
+
 
 
 #loops through image_box and if there is a snag in the file type goes through try/except to get the right file type
 #i know this part is really sloppy and can be cleaned up
 #the x += 1 is solely for nomenclature to name the images/videos
 
-# print('Retrieving top images and videos...')
-# for items in image_box:
-#     image_name1 = fbb_name + ' (' + str(x) + ').jpg'
-#     image_name2 = fbb_name + ' (' + str(x) + ').mp4'
-#     image_name3 = fbb_name + ' (' + str(x) + ').png'
-    
-#     try:
-#         try:
-#             urllib.request.urlretrieve(items, os.path.join(my_path, image_name1))
-#             x += 1 
-#         except:
-#             items = items.replace('jpg','mp4')
-#             urllib.request.urlretrieve(items, os.path.join(my_path, image_name2))
-#             x += 1
-#     except:
-#         items = items.replace('mp4','png')
-#         urllib.request.urlretrieve(items, os.path.join(my_path, image_name3))
-#         x += 1
+image_sources_cleaned = set(image_sources_cleaned)
+new_images = image_sources_cleaned - image_log
 
+print('Retrieving ' + str(len(new_images)) + ' new images.')
+x = 1
+for items in new_images:
+    image_name1 = fbb_name + ' (' + str(x) + ').jpg'
+    image_name2 = fbb_name + ' (' + str(x) + ').mp4'
+    image_name3 = fbb_name + ' (' + str(x) + ').png'
     
+    try:
+        try:
+            urllib.request.urlretrieve(items, os.path.join(folder_path, image_name1))
+            x += 1 
+        except:
+            items = items.replace('jpg','mp4')
+            urllib.request.urlretrieve(items, os.path.join(folder_path, image_name2))
+            x += 1
+    except:
+        items = items.replace('mp4','png')
+        urllib.request.urlretrieve(items, os.path.join(folder_path, image_name3))
+        x += 1
+
+
+with open(image_log_path, 'a') as f:
+    for item in new_images:  # Changed 'set' to 'my_set'
+        f.write(f"{item}\n")
     
 print('Done.')
     
